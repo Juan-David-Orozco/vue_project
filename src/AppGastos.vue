@@ -57,10 +57,11 @@
       </div>
 
       <div class="container text-center my-3">
-        <div class="row lead border rounded bg-dark text-white py-1">
-          <div class="col-3">Nombre del gasto</div>
+        <div class="row lead border rounded bg-dark text-white text-center py-1">
+          <div class="col-4">Nombre del gasto</div>
           <div class="col-3">Monto del gasto</div>
           <div class="col-3">Tipo de gasto</div>
+          <div class="col-2">Accion</div>
         </div>
         <!-- lista de los gastos -->
         <gastosComponente
@@ -69,7 +70,16 @@
           v-bind:id="gasto.id"
           v-bind:indice="index"
           v-bind:key="index"
+          v-on:eliminarGasto="eliminarGasto($event)"
+          v-on:editarGasto="editarGasto($event)"
         ></gastosComponente>
+      </div>
+
+      <div
+        class="col-4 btn btn-danger mx-auto my-2"
+        @click="salir()"
+      >
+        Salir
       </div>
 
     </div>
@@ -200,12 +210,12 @@ export default {
           .collection("/usuarios/" + this.idUsuario + "/gastos")
           .doc(this.idEditar);
         Ref.update({
-          MontoGasto: this.montoGasto,
-          NombreGasto: this.nombreGasto,
-          TipoGasto: this.tipoGasto
+          monto: this.montoGasto,
+          nombre: this.nombreGasto,
+          tipo: this.tipoGasto
         });
-
         // actualizando los valores de la lista
+        
         //this.totalGasto -= this.montoAnt;
         this.gastos[
           this.gastos.indexOf(
@@ -223,7 +233,7 @@ export default {
           )
         ].monto = this.montoGasto;
         //this.totalGasto += parseFloat(this.montoGasto);
-
+        
         this.montoGasto = "";
         this.nombreGasto = "";
         this.tipoGasto = "";
@@ -232,6 +242,33 @@ export default {
         this.boton = "fa fa-plus";
         document.getElementById("actualizar").setAttribute("id", "agregar");
       }
+    },
+    editarGasto: function(cambio) {
+      // Modificar gasto
+      this.actualizar = true;
+      this.despliegue = true;
+      this.boton = "fa fa-minus";
+      if (!document.getElementById("actualizar")) {
+        document.getElementById("agregar").setAttribute("id", "actualizar");
+      }
+      this.montoGasto = cambio.monto;
+      this.nombreGasto = cambio.nombre;
+      this.tipoGasto = cambio.tipo;
+      this.idEditar = cambio.id;
+      //this.montoAnt = parseFloat(cambio.monto);
+      this.indice = parseInt(cambio.indice);
+    },
+    eliminarGasto: function(gastoID) {
+      console.log(gastoID)
+      // Eliminar gastos
+      // Eliminar gastos en la lista de filtros y la lista genera que es gastos
+      //this.totalGasto -= parseFloat(gastoID.monto);
+      this.coleccion.doc(gastoID.id).delete();
+      this.gastos.splice(gastoID.indice, 1);
+    },
+    salir: function(){
+      this.logon = false
+      this.gastos = []
     },
   }
 }
