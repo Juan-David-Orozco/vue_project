@@ -1,5 +1,5 @@
 <template>
-  <div id="login">
+  <div id="form">
     <div class="container my-3 border rounded bg-light" style="width: 50%">
       <div class="row">
         <div class="col-12 text-center my-2"><h3>Ingreso al Sistema</h3></div>
@@ -77,7 +77,6 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: left;
   color: #2c3e50;
   margin-top: 60px;
 }

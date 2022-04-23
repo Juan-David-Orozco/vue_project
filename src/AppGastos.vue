@@ -8,7 +8,7 @@
     </div>
     <div id='inicio' class="container mx-auto p-2" v-else>
       
-      <!-- Contenido de las listas de gasto -->
+      <!-- Encabezado: lista de gasto + botonPlus -->
       <div class="container">
         <div class="row bg-dark">
           <div class="col-10 text-white text-center my-auto">
@@ -25,8 +25,20 @@
         </div>
       </div>
 
+      <div class="container-fluid mt-1 rounded bg-light">
+        <div class="row">
+          <div class="col-md-3 col-sm-12"><b>Bienvenido:</b></div>
+          <div class="col-md-9 col-sm-12">
+            <i class="fa fa-user"></i> Usuario: {{idUsuario}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Seccion para agregar/actualizar gastos ( mostrar/ocultar ) -->
       <div v-if="despliegue" key="despliegue" class="container border bg-light rounded text-primary lead p-2 my-2">
-        <div class="h3 bg-info text-dark my-0">Agregar Gasto</div>
+        <div :class="['text-dark', 'my-1', colorHeader = actualizar ? 'bg-info' : 'bg-primary' ]">
+          <h3>{{encabezado}} Gasto</h3>
+        </div>
         
         <div class="row justify-content-md-center my-2">
           <div class="col-sm-10 col-md-4 mx-auto my-auto">Nombre del gasto</div>
@@ -96,6 +108,7 @@ export default {
   name:'app',
     data: function() {
     return {
+      encabezado:'Agregar',
       boton: "fa fa-plus",
       gastos: [],
       filtrados: [],
@@ -165,6 +178,7 @@ export default {
         this.boton = "fa fa-minus";
         document.getElementById("agregar").setAttribute("id", "actualizar");
         this.despliegue = true;
+        this.encabezado='Agregar'
       } else if (event.target.id === "actualizar") {
         this.boton = "fa fa-plus";
         document.getElementById("actualizar").setAttribute("id", "agregar");
@@ -244,6 +258,7 @@ export default {
       }
     },
     editarGasto: function(cambio) {
+      this.encabezado='Actualizar'
       // Modificar gasto
       this.actualizar = true;
       this.despliegue = true;
@@ -269,6 +284,7 @@ export default {
     salir: function(){
       this.logon = false
       this.gastos = []
+      console.log(this.gastos)
     },
   }
 }
