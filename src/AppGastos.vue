@@ -8,7 +8,7 @@
     </div>
     <div id='inicio' class="container mx-auto p-2" v-else>
       
-      <!-- Encabezado: lista de gasto + botonPlus -->
+      <!-- Encabezado: lista de gastos + botonPlus -->
       <div class="container">
         <div class="row bg-dark">
           <div class="col-10 text-white text-center my-auto">
@@ -25,8 +25,9 @@
         </div>
       </div>
 
+      <!--    Seccion informacion de usuario    -->
       <div class="container-fluid mt-1 rounded bg-light">
-        <div class="row">
+        <div class="row p-1" style="font-size:20px">
           <div class="col-md-3 col-sm-12"><b>Bienvenido:</b></div>
           <div class="col-md-9 col-sm-12">
             <i class="fa fa-user"></i> Usuario: {{idUsuario}}
@@ -36,10 +37,11 @@
 
       <!-- Seccion para agregar/actualizar gastos ( mostrar/ocultar ) -->
       <div v-if="despliegue" key="despliegue" class="container border bg-light rounded text-primary lead p-2 my-2">
+        <!-- Header contenido agregar/actualizar -->
         <div :class="['text-dark', 'my-1', colorHeader = actualizar ? 'bg-info' : 'bg-primary' ]">
           <h3>{{encabezado}} Gasto</h3>
         </div>
-        
+        <!-- Campos de ingreso gasto ( nombre - monto - tipo ) -->
         <div class="row justify-content-md-center my-2">
           <div class="col-sm-10 col-md-4 mx-auto my-auto">Nombre del gasto</div>
           <div class="col-sm-8 col-md-4 mx-auto my-auto">
@@ -68,7 +70,8 @@
         </div>
       </div>
 
-      <div class="container text-center my-3">
+      <!-- contenedor de la lista de gastos -->
+      <div class="container text-center mt-3 mb-1">
         <div class="row lead border rounded bg-dark text-white text-center py-1">
           <div class="col-4">Nombre del gasto</div>
           <div class="col-3">Monto del gasto</div>
@@ -78,6 +81,7 @@
         <!-- lista de los gastos -->
         <gastosComponente
           v-for="(gasto,index) in gastos"
+          v-show="filter==='filtro'"
           v-bind:gasto="gasto"
           v-bind:id="gasto.id"
           v-bind:indice="index"
@@ -87,8 +91,20 @@
         ></gastosComponente>
       </div>
 
+      <div class="container">
+        <div class="row border rounded bg-dark p-1" style="font-size:18px">
+          <div class="col-6 text-left text-white"><b>Total</b></div>
+          <div v-if="filter==='filtro'" class="col-6 text-center text-warning">
+            <b>{{new Intl.NumberFormat("de-DE").format(totalGasto)}}</b>
+          </div>
+          <div v-else class="col-6 text-center text-white">
+            <b>{{new Intl.NumberFormat("de-DE").format(cantidad)}}</b>
+          </div>
+        </div>
+      </div>
+
       <div
-        class="col-4 btn btn-danger mx-auto my-2"
+        class="col-4 btn btn-danger mx-auto mt-4 mb-2"
         @click="salir()"
       >
         Salir
@@ -106,7 +122,7 @@ import gastosComponente from "./components/GastosComponente.vue";
 
 export default {
   name:'app',
-    data: function() {
+  data: function() {
     return {
       encabezado:'Agregar',
       boton: "fa fa-plus",
@@ -168,7 +184,7 @@ export default {
             nombre: gasto.data().nombre,
             tipo: gasto.data().tipo
           });
-          //this.totalGasto += parseFloat(gasto.data().MontoGasto);
+          this.totalGasto += parseFloat(gasto.data().monto);
         });
       });
       console.log(this.gastos)
@@ -188,6 +204,10 @@ export default {
       this.montoGasto = "";
       this.nombreGasto = "";
       this.tipoGasto = "";
+      this.filter = "filtro";
+      this.mostrarHogar = "";
+      this.mostrarTrabajo = "";
+      this.mostrarCarros = "";
     },
     manejarClick: function(evento) {
       if (evento.target.id === "agregar") {
@@ -197,7 +217,7 @@ export default {
           nombre: this.nombreGasto,
           tipo: this.tipoGasto
         };
-        //this.totalGasto += parseFloat(this.montoGasto);
+        this.totalGasto += parseFloat(this.montoGasto);
         this.coleccion
           .add(gastoData)
           .then(docReference => {
@@ -228,9 +248,20 @@ export default {
           nombre: this.nombreGasto,
           tipo: this.tipoGasto
         });
+
+        // Actualizando los valores de la lista de filtro
+        console.log(this.montoAnt);
+        this.cantidad -= this.montoAnt;
+        console.log(this.cantidad);
+        if (this.filter !== "filtro") {
+          this.filtrados[this.indice].nombre = this.nombreGasto;
+          this.filtrados[this.indice].tipo = this.tipoGasto;
+          this.filtrados[this.indice].monto = this.montoGasto;
+          this.cantidad += parseFloat(this.montoGasto);
+        }
+
         // actualizando los valores de la lista
-        
-        //this.totalGasto -= this.montoAnt;
+        this.totalGasto -= this.montoAnt;
         this.gastos[
           this.gastos.indexOf(
             this.gastos.find(element => element.id === this.idEditar)
@@ -246,7 +277,7 @@ export default {
             this.gastos.find(element => element.id === this.idEditar)
           )
         ].monto = this.montoGasto;
-        //this.totalGasto += parseFloat(this.montoGasto);
+        this.totalGasto += parseFloat(this.montoGasto);
         
         this.montoGasto = "";
         this.nombreGasto = "";
@@ -270,20 +301,31 @@ export default {
       this.nombreGasto = cambio.nombre;
       this.tipoGasto = cambio.tipo;
       this.idEditar = cambio.id;
-      //this.montoAnt = parseFloat(cambio.monto);
+      this.montoAnt = parseFloat(cambio.monto);
       this.indice = parseInt(cambio.indice);
     },
     eliminarGasto: function(gastoID) {
       console.log(gastoID)
       // Eliminar gastos
       // Eliminar gastos en la lista de filtros y la lista genera que es gastos
-      //this.totalGasto -= parseFloat(gastoID.monto);
-      this.coleccion.doc(gastoID.id).delete();
-      this.gastos.splice(gastoID.indice, 1);
+      if (this.filter !== "filtro") {
+        this.cantidad -= parseFloat(gastoID.monto);
+        this.totalGasto -= parseFloat(gastoID.monto);
+        this.filtrados.splice(gastoID.indice, 1);
+        this.coleccion.doc(gastoID.id).delete();
+        this.gastos.splice(
+          this.gastos.indexOf(this.gastos.find(element => element.id === gastoID.id)), 1
+        )
+      } else{
+        this.totalGasto -= parseFloat(gastoID.monto);
+        this.coleccion.doc(gastoID.id).delete();
+        this.gastos.splice(gastoID.indice, 1);
+      }
     },
     salir: function(){
       this.logon = false
       this.gastos = []
+      this.totalGasto = 0.0
       console.log(this.gastos)
     },
   }
